@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Kaleidoscope</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(45deg, #000428, #004e92);
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        a {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            color: black;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 10px;
+            margin-top: 30px;
+            font-size: 18px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        a:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        h1 {
+            background: linear-gradient(to right, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 18px;
+            max-width: 600px;
+            margin: 10px auto 30px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Kaleidoscope By Ratna Kirti</h1>
+    <p>Experience a beautiful interactive kaleidoscope visualization powered by WebGL. Move your mouse across the screen to create mesmerizing patterns that respond to your movements.</p>
+    <a href="file2.html">Launch Kaleidoscope</a>
+</body>
+</html>

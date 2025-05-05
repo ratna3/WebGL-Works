@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Kaleidoscope</title>
+    <style>
+        /* Base styling for the body */
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Canvas to fill the whole viewport */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        /* Instructions panel styling */
+        #instructionsPanel {
+            position: absolute;
+            color: white;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            max-width: 300px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            z-index: 10;
+        }
+        
+        /* Control panel styling */
+        #controlPanel {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
+            z-index: 10;
+        }
+        
+        /* Interactive controls styling */
+        button, input, select {
+            margin: 8px 5px;
+            padding: 8px 12px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        /* Hover effects for controls */
+        button:hover, input:hover, select:hover {
+            background: #555;
+        }
+        
+        /* Label styling */
+        label {
+            color: white;
+            display: block;
+            margin-top: 10px;
+        }
+        
+        /* Control groups spacing */
+        .controlGroup {
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Instructions panel for users -->
+    <div id="instructionsPanel">
+        <h2>Interactive Kaleidoscope</h2>
+        <p>Move your mouse across the screen to change the pattern</p>
+        <p>Use the controls to adjust the symmetry and colors</p>
+    </div>
+
+    <!-- WebGL canvas for rendering the kaleidoscope -->
+    <canvas id="gl-canvas"></canvas>
+    
+    <!-- Control panel for user adjustments -->
+    <div id="controlPanel">
+        <h3>Controls</h3>
+        <button id="resetBtn">Reset All</button>
+        
+        <div class="controlGroup">
+            <label for="segments">Symmetry Segments:</label>
+            <input type="range" id="segments" min="3" max="20" value="8">
+        </div>
+        
+        <div class="controlGroup">
+            <label for="speed">Animation Speed:</label>
+            <input type="range" id="speed" min="0" max="100" value="50">
+        </div>
+        
+        <div class="controlGroup">
+            <label for="colorScheme">Color Theme:</label>
+            <select id="colorScheme">
+                <option value="0">Rainbow Spectrum</option>
+                <option value="1">Ocean Blues</option>
+                <option value="2">Warm Sunset</option>
+                <option value="3">Electric Neon</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Vertex Shader for Kaleidoscope -->
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        // Input vertex position (2D coordinates for screen quad)
+        attribute vec2 aPosition;
+        
+        void main() {
+            // Output position for fragment shader (pass through)
+            gl_Position = vec4(aPosition, 0.0, 1.0);
+        }
+    </script>
+
+    <!-- Fragment Shader for Kaleidoscope -->
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        // Set high precision for better visual quality
+        precision highp float;
+        
+        // Uniform inputs from JavaScript
+        uniform float uTime;          // Time for animation
+        uniform vec2 uResolution;     // Canvas resolution
+        uniform vec2 uMouse;          // Mouse position
+        uniform int uSegments;        // Number of kaleidoscope segments
+        uniform float uSpeed;         // Animation speed
+        uniform int uColorScheme;     // Selected color theme
+        
+        // Mathematical constant
+        #define PI 3.14159265359
+        
+        // Rainbow color generation function
+        vec3 getRainbow(float t) {
+            // Create a smooth color cycle using cosine
+            vec3 a = vec3(0.5, 0.5, 0.5);
+            vec3 b = vec3(0.5, 0.5, 0.5);
+            vec3 c = vec3(1.0, 1.0, 1.0);
+            vec3 d = vec3(0.0, 0.33, 0.67);
+            return a + b * cos(2.0 * PI * (c * t + d));
+        }
+        
+        // Ocean blues color generation function
+        vec3 getOceanBlues(float t) {
+            return mix(
+                vec3(0.0, 0.5, 0.8),  // Light blue
+                vec3(0.0, 0.2, 0.5),  // Deep blue
+                0.5 + 0.5 * sin(t * PI * 2.0)
+            );
+        }
+        
+        // Warm sunset color generation function
+        vec3 getWarmSunset(float t) {
+            return mix(
+                vec3(0.8, 0.2, 0.0),  // Orange-red
+                vec3(0.8, 0.5, 0.0),  // Golden
+                0.5 + 0.5 * sin(t * PI * 2.0)
+            );
+        }
+        
+        // Electric neon color generation function
+        vec3 getElectricNeon(float t) {
+            return mix(
+                vec3(1.0, 0.0, 1.0),  // Magenta
+                vec3(0.0, 1.0, 1.0),  // Cyan
+                0.5 + 0.5 * sin(t * PI * 2.0)
+            );
+        }
+        
+        // Color scheme selector function
+        vec3 getColor(float t) {
+            if (uColorScheme == 1) {
+                return getOceanBlues(t);
+            } else if (uColorScheme == 2) {
+                return getWarmSunset(t);
+            } else if (uColorScheme == 3) {
+                return getElectricNeon(t);
+            } else {
+                return getRainbow(t);
+            }
+        }
+        
+        void main() {
+            // Normalize pixel coordinates to center with aspect ratio correction
+            vec2 p = (2.0 * gl_FragCoord.xy - uResolution) / min(uResolution.x, uResolution.y);
+            
+            // Normalize mouse position for interactive effects
+            vec2 mouse = uMouse / uResolution;
+            
+            // Calculate polar coordinates (angle and radius from center)
+            float angle = atan(p.y, p.x);
+            float radius = length(p);
+            
+            // Apply kaleidoscope symmetry based on segment count
+            float segmentAngle = 2.0 * PI / float(uSegments);
+            angle = mod(angle, segmentAngle);
+            
+            // Mirror alternate segments for more interesting patterns
+            if (mod(floor(angle / segmentAngle), 2.0) == 1.0) {
+                angle = segmentAngle - angle;
+            }
+            
+            // Calculate animation time with speed adjustment
+            float t = uTime * 0.001 * uSpeed;
+            
+            // Apply mouse position to influence pattern
+            float mouseInfluence = (1.0 - mouse.y) * 5.0;
+            float distanceEffect = sin(radius * 10.0 * mouse.x + t) * 0.5 + 0.5;
+            
+            // Generate base color using multiple parameters for variety
+            vec3 color = getColor(
+                distanceEffect + 
+                radius * 2.0 + 
+                sin(angle * 3.0 + t) + 
+                t * 0.3
+            );
+            
+            // Add glow effect that pulses with time and mouse position
+            float glow = smoothstep(0.4, 0.6, sin(radius * mouseInfluence + t * 2.0) * 0.5 + 0.5);
+            color += getColor(t * 0.5) * glow * 0.5;
+            
+            // Add special effect near the center
+            float centerGlow = smoothstep(0.8, 0.0, radius);
+            color = mix(color, getColor(t * 0.2 + 0.5), centerGlow * 0.7);
+            
+            // Set the final pixel color
+            gl_FragColor = vec4(color, 1.0);
+        }
+    </script>
+
+    <!-- Load required JavaScript files -->
+    <script src="webgl-utils.js"></script>
+    <script src="MV.js"></script>
+    <script src="kaleidoscope.js"></script>
+</body>
+</html>
