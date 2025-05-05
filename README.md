@@ -2,8 +2,6 @@
 
 A beautiful WebGL-based kaleidoscope visualization that responds to mouse movements and user input.
 
-![Kaleidoscope Preview](preview.png)
-
 ## Files Organization
 
 The project consists of the following files:
