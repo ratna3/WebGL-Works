@@ -56,7 +56,7 @@ This kaleidoscope visualization uses WebGL fragment shaders to create the kaleid
 
 ## Credits
 
-Created by Ratna Kirthi
+Created by Ratna Kirti
 
 ## License
 
